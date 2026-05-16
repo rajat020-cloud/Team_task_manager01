@@ -38,9 +38,9 @@ A professional full-stack project and task management application built with Rea
 2. `npm install`
 3. `npm run dev` to start the frontend server.
 
-## Deployment (Railway)
+## Deployment (Vercel)
 
-1. Connect your GitHub repository to Railway.
+1. Connect your GitHub repository to Vercel.
 2. Add MongoDB Atlas connection string in environment variables.
 3. Configure frontend and backend services.
 4. Deploy the application and verify all APIs work correctly.

@@ -5,7 +5,6 @@ import {
   Briefcase, 
   CheckSquare, 
   Users, 
-  Settings, 
   LogOut 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';

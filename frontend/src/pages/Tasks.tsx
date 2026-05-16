@@ -2,12 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { 
   Plus, 
   Search, 
-  Filter, 
-  Clock, 
-  AlertCircle, 
-  CheckCircle2, 
-  User, 
-  MoreVertical,
   Calendar,
   Tag
 } from 'lucide-react';
@@ -34,7 +28,7 @@ const Tasks: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const statusFilter = 'all';
   
   const [newTask, setNewTask] = useState({
     title: '',

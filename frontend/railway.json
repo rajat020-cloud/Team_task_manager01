@@ -4,10 +4,8 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "npm run start",
+    "startCommand": "npx serve dist -s -l $PORT",
     "restartPolicyType": "ON_FAILURE",
-    "healthcheckPath": "/",
-    "healthcheckTimeout": 300,
-    "serviceName": "taskflow-backend"
+    "serviceName": "taskflow-frontend"
   }
 }

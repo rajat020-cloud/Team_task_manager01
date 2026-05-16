@@ -30,6 +30,7 @@ model User {
   email     String   @unique
   password  String
   role      Role     @default(Member)
+  remarks   String?
   createdAt DateTime @default(now())
   
   projectsCreated Project[] @relation("ProjectCreator")
@@ -39,6 +40,7 @@ model User {
   
   tasksAssigned   Task[]    @relation("TaskAssignee")
   tasksCreated    Task[]    @relation("TaskCreator")
+  notifications   Notification[]
 }
 
 model Project {
@@ -70,4 +72,13 @@ model Task {
   creator     User       @relation("TaskCreator", fields: [createdBy], references: [id])
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

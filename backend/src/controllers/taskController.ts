@@ -38,7 +38,7 @@ export const createTask = async (req: AuthRequest, res: Response) => {
       data: {
         title,
         description,
-        assignedTo,
+        assignedTo: assignedTo || null,
         projectId,
         priority,
         status,
@@ -47,6 +47,15 @@ export const createTask = async (req: AuthRequest, res: Response) => {
       },
       include: { assignee: true, project: true },
     });
+
+    if (assignedTo && assignedTo !== userId) {
+      await prisma.notification.create({
+        data: {
+          userId: assignedTo,
+          message: `You have been assigned a new task: ${title}`,
+        }
+      });
+    }
 
     res.status(201).json(task);
   } catch (error: any) {
@@ -67,7 +76,7 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
     // Members can only update status
     let updateData: any = { status };
     if (role === "Admin") {
-      updateData = { title, description, assignedTo, priority, status, dueDate: dueDate ? new Date(dueDate) : null };
+      updateData = { title, description, assignedTo: assignedTo || null, priority, status, dueDate: dueDate ? new Date(dueDate) : null };
     }
 
     const task = await prisma.task.update({
@@ -75,6 +84,24 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
       data: updateData,
       include: { assignee: true, project: true },
     });
+
+    if (role === "Admin" && assignedTo && assignedTo !== existingTask.assignedTo && assignedTo !== userId) {
+      await prisma.notification.create({
+        data: {
+          userId: assignedTo,
+          message: `You have been assigned to task: ${task.title}`,
+        }
+      });
+    }
+
+    if (status === "Completed" && existingTask.status !== "Completed" && task.createdBy !== userId) {
+      await prisma.notification.create({
+        data: {
+          userId: task.createdBy,
+          message: `Task completed: ${task.title} by ${req.user?.name}`,
+        }
+      });
+    }
 
     res.status(200).json(task);
   } catch (error: any) {

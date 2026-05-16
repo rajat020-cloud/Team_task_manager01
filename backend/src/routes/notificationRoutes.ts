@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { getUsers, updateRemarks } from '../controllers/teamController.js';
+import { getNotifications, markAsRead } from '../controllers/notificationController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
 router.use(protect);
-router.get('/', getUsers);
-router.put('/:id/remarks', updateRemarks);
+router.get('/', getNotifications);
+router.put('/read', markAsRead);
 
 export default router;

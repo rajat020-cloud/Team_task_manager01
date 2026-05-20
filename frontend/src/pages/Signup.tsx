@@ -33,16 +33,9 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-6 overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="/login_background_abstract_1778431247836.png" 
-          alt="background" 
-          className="w-full h-full object-cover scale-105 animate-pulse-slow"
-        />
-        <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"></div>
-      </div>
+    <div className="min-h-screen relative flex items-center justify-center p-6 overflow-hidden bg-slate-950">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(96,165,250,0.22),transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(139,92,246,0.18),transparent_18%)]" />
+      <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-sm" />
 
       <motion.div 
         initial={{ opacity: 0, y: 40, scale: 0.9 }}
@@ -145,6 +138,7 @@ const Signup: React.FC = () => {
                   <ShieldCheck className="w-5 h-5" />
                 </span>
                 <select
+                  aria-label="Account Role"
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value as 'Admin' | 'Member' })}
                   className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border-2 border-transparent rounded-2xl focus:outline-none focus:bg-white focus:border-primary-500 transition-all duration-300 text-slate-900 font-medium appearance-none"

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Bell, Search, Check, Circle, Loader2, Briefcase, CheckSquare, User as UserIcon } from 'lucide-react';
+import { Bell, Search, Check, Loader2, Briefcase, CheckSquare, User as UserIcon, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,8 +10,6 @@ export const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
-
-  // Search State
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<{tasks: any[], projects: any[], team: any[]}>({ tasks: [], projects: [], team: [] });
@@ -21,14 +19,12 @@ export const Navbar: React.FC = () => {
     try {
       const res = await api.get('/notifications');
       setNotifications(res.data);
-    } catch (error) {
-      console.error('Failed to fetch notifications');
-    }
+    } catch {}
   };
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 10000); // Polling every 10s
+    const interval = setInterval(fetchNotifications, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -39,24 +35,16 @@ export const Navbar: React.FC = () => {
         setIsSearching(true);
         try {
           const [tasksRes, projectsRes, teamRes] = await Promise.all([
-            api.get('/tasks'),
-            api.get('/projects'),
-            api.get('/team')
+            api.get('/tasks'), api.get('/projects'), api.get('/team')
           ]);
-          
           const q = searchQuery.toLowerCase();
           setSearchResults({
-            tasks: tasksRes.data.filter((t: any) => t.title.toLowerCase().includes(q) || (t.description && t.description.toLowerCase().includes(q))),
-            projects: projectsRes.data.filter((p: any) => p.title.toLowerCase().includes(q) || (p.description && p.description.toLowerCase().includes(q))),
-            team: teamRes.data.filter((m: any) => m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q))
+            tasks: tasksRes.data.filter((t: any) => t.title.toLowerCase().includes(q)),
+            projects: projectsRes.data.filter((p: any) => p.title.toLowerCase().includes(q)),
+            team: teamRes.data.filter((m: any) => m.name.toLowerCase().includes(q))
           });
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setIsSearching(false);
-        }
+        } catch {} finally { setIsSearching(false); }
       };
-
       const timer = setTimeout(executeSearch, 400);
       return () => clearTimeout(timer);
     } else {
@@ -71,90 +59,79 @@ export const Navbar: React.FC = () => {
     try {
       await api.put('/notifications/read');
       setNotifications(notifications.map(n => ({ ...n, isRead: true })));
-    } catch (error) {
-      console.error('Failed to mark notifications as read');
-    }
+    } catch {}
   };
 
   const handleNavigate = (path: string) => {
-    setShowSearch(false);
-    setSearchQuery('');
-    navigate(path);
+    setShowSearch(false); setSearchQuery(''); navigate(path);
   };
 
+  const initials = user?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
+
   return (
-    <header className="h-20 glass border-b border-white/20 flex items-center justify-between px-10 relative z-10">
-      <div className="relative w-[450px]">
-        <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
-          {isSearching ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+    <header className="h-16 glass border-b border-slate-200/60 flex items-center justify-between px-4 md:px-6 relative z-10">
+      {/* Search */}
+      <div className="relative w-full max-w-xl">
+        <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
+          {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
         </span>
         <input
           type="text"
-          placeholder="Search for tasks, people or projects..."
-          className="block w-full pl-12 pr-4 py-3 bg-white/40 border border-white/40 rounded-2xl leading-5 placeholder-slate-400 focus:outline-none focus:bg-white/80 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300 text-sm font-medium"
+          placeholder="Search tasks, projects, people..."
+          className="block w-full pl-10 pr-8 py-2.5 bg-slate-100/80 border border-transparent rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-200 focus:ring-2 focus:ring-blue-500/10 transition-all duration-200 text-slate-700 font-medium"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          onFocus={() => { if(searchQuery.length >= 2) setShowSearch(true); }}
+          onFocus={() => { if (searchQuery.length >= 2) setShowSearch(true); }}
         />
+        {searchQuery && (
+          <button aria-label="Clear search" onClick={() => { setSearchQuery(''); setShowSearch(false); }} className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
 
         <AnimatePresence>
           {showSearch && (
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="absolute left-0 mt-3 w-[500px] glass-card bg-white/95 p-0 overflow-hidden shadow-2xl border border-slate-100 z-50 max-h-96 overflow-y-auto"
+              exit={{ opacity: 0, y: 8 }}
+              className="absolute left-0 top-full mt-2 w-[400px] bg-white rounded-2xl shadow-2xl shadow-slate-200/80 border border-slate-100 overflow-hidden z-50"
             >
-              <div className="p-4 border-b border-slate-100 bg-slate-50">
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Global Search Results</h3>
+              <div className="px-4 py-2.5 border-b border-slate-50 bg-slate-50/80">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Search Results</p>
               </div>
-
               {!isSearching && searchResults.tasks.length === 0 && searchResults.projects.length === 0 && searchResults.team.length === 0 && (
-                <div className="p-6 text-center text-sm font-medium text-slate-500">
-                  No matches found for "{searchQuery}"
-                </div>
+                <div className="p-8 text-center text-sm text-slate-400">No results for "{searchQuery}"</div>
               )}
-
               {searchResults.projects.length > 0 && (
-                <div className="py-2">
-                  <h4 className="px-5 py-2 text-[10px] font-bold text-primary-600 uppercase tracking-widest bg-primary-50/50">Projects</h4>
-                  {searchResults.projects.map(p => (
-                    <div key={p.id} onClick={() => handleNavigate('/projects')} className="px-5 py-3 hover:bg-slate-50 cursor-pointer flex items-center gap-3 border-b border-slate-50 last:border-0 transition-colors">
-                      <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600"><Briefcase className="w-4 h-4" /></div>
-                      <div>
-                        <p className="text-sm font-bold text-slate-900">{p.title}</p>
-                        <p className="text-xs text-slate-500 truncate max-w-sm">{p.description || 'No description'}</p>
-                      </div>
+                <div className="pb-2">
+                  <p className="px-4 pt-3 pb-1 text-[10px] font-bold text-blue-600 uppercase tracking-widest">Projects</p>
+                  {searchResults.projects.slice(0, 3).map(p => (
+                    <div key={p.id} onClick={() => handleNavigate('/projects')} className="px-4 py-2 hover:bg-blue-50/50 cursor-pointer flex items-center gap-3 transition-colors">
+                      <div className="w-7 h-7 rounded-lg bg-violet-50 flex items-center justify-center flex-shrink-0"><Briefcase className="w-3.5 h-3.5 text-violet-600" /></div>
+                      <div><p className="text-sm font-semibold text-slate-700">{p.title}</p></div>
                     </div>
                   ))}
                 </div>
               )}
-
               {searchResults.tasks.length > 0 && (
-                <div className="py-2">
-                  <h4 className="px-5 py-2 text-[10px] font-bold text-primary-600 uppercase tracking-widest bg-primary-50/50">Tasks</h4>
-                  {searchResults.tasks.map(t => (
-                    <div key={t.id} onClick={() => handleNavigate('/tasks')} className="px-5 py-3 hover:bg-slate-50 cursor-pointer flex items-center gap-3 border-b border-slate-50 last:border-0 transition-colors">
-                      <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600"><CheckSquare className="w-4 h-4" /></div>
-                      <div>
-                        <p className="text-sm font-bold text-slate-900">{t.title}</p>
-                        <p className="text-xs text-slate-500">Status: {t.status}</p>
-                      </div>
+                <div className="pb-2">
+                  <p className="px-4 pt-2 pb-1 text-[10px] font-bold text-blue-600 uppercase tracking-widest">Tasks</p>
+                  {searchResults.tasks.slice(0, 3).map(t => (
+                    <div key={t.id} onClick={() => handleNavigate('/tasks')} className="px-4 py-2 hover:bg-blue-50/50 cursor-pointer flex items-center gap-3 transition-colors">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0"><CheckSquare className="w-3.5 h-3.5 text-emerald-600" /></div>
+                      <div><p className="text-sm font-semibold text-slate-700">{t.title}</p></div>
                     </div>
                   ))}
                 </div>
               )}
-
               {searchResults.team.length > 0 && (
-                <div className="py-2">
-                  <h4 className="px-5 py-2 text-[10px] font-bold text-primary-600 uppercase tracking-widest bg-primary-50/50">Team Members</h4>
-                  {searchResults.team.map(m => (
-                    <div key={m.id} onClick={() => handleNavigate('/team')} className="px-5 py-3 hover:bg-slate-50 cursor-pointer flex items-center gap-3 border-b border-slate-50 last:border-0 transition-colors">
-                      <div className="p-2 rounded-lg bg-amber-50 text-amber-600"><UserIcon className="w-4 h-4" /></div>
-                      <div>
-                        <p className="text-sm font-bold text-slate-900">{m.name}</p>
-                        <p className="text-xs text-slate-500">{m.email}</p>
-                      </div>
+                <div className="pb-2">
+                  <p className="px-4 pt-2 pb-1 text-[10px] font-bold text-blue-600 uppercase tracking-widest">People</p>
+                  {searchResults.team.slice(0, 3).map(m => (
+                    <div key={m.id} onClick={() => handleNavigate('/team')} className="px-4 py-2 hover:bg-blue-50/50 cursor-pointer flex items-center gap-3 transition-colors">
+                      <div className="w-7 h-7 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0"><UserIcon className="w-3.5 h-3.5 text-orange-500" /></div>
+                      <div><p className="text-sm font-semibold text-slate-700">{m.name}</p></div>
                     </div>
                   ))}
                 </div>
@@ -164,71 +141,66 @@ export const Navbar: React.FC = () => {
         </AnimatePresence>
       </div>
 
-      <div className="flex items-center gap-6 relative">
+      {/* Right Side */}
+      <div className="flex items-center gap-3">
+        {/* Notifications */}
         <div className="relative">
-          <button 
+          <button
             onClick={() => setShowDropdown(!showDropdown)}
-            className="p-2.5 text-slate-500 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all relative group"
+            className="relative w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100/80 text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200"
           >
-            <Bell className="w-6 h-6" />
+            <Bell style={{width: '17px', height: '17px'}} />
             {unreadCount > 0 && (
-              <span className="absolute top-2.5 right-2.5 block h-2.5 w-2.5 rounded-full bg-accent-rose ring-2 ring-white animate-pulse"></span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white" />
             )}
           </button>
 
           <AnimatePresence>
             {showDropdown && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              <motion.div
+                initial={{ opacity: 0, y: 8, scale: 0.96 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute right-0 mt-3 w-80 glass-card bg-white/90 p-0 overflow-hidden shadow-2xl border border-slate-100 z-50"
+                exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl shadow-slate-200/80 border border-slate-100 overflow-hidden z-50"
               >
-                <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                  <h3 className="font-bold text-slate-900">Notifications</h3>
+                <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                  <h3 className="font-bold text-slate-800 text-sm">Notifications {unreadCount > 0 && <span className="ml-1.5 text-xs font-normal text-slate-400">({unreadCount} new)</span>}</h3>
                   {unreadCount > 0 && (
-                    <button onClick={markAllAsRead} className="text-xs font-bold text-primary-600 hover:text-primary-700">
-                      Mark all as read
+                    <button onClick={markAllAsRead} className="text-xs font-semibold text-blue-600 hover:text-blue-700 px-2 py-1 rounded-lg hover:bg-blue-50 transition-colors">
+                      Mark read
                     </button>
                   )}
                 </div>
-                <div className="max-h-80 overflow-y-auto">
-                  {notifications.length > 0 ? (
-                    notifications.map(n => (
-                      <div key={n.id} className={`p-4 border-b border-slate-50 flex gap-3 ${!n.isRead ? 'bg-primary-50/30' : ''}`}>
-                        <div className="mt-1">
-                          {!n.isRead ? <Circle className="w-2.5 h-2.5 fill-primary-500 text-primary-500" /> : <Check className="w-3 h-3 text-slate-300" />}
-                        </div>
-                        <div>
-                          <p className={`text-sm ${!n.isRead ? 'font-bold text-slate-900' : 'font-medium text-slate-600'}`}>{n.message}</p>
-                          <p className="text-[10px] text-slate-400 mt-1 font-bold tracking-wider uppercase">
-                            {new Date(n.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                          </p>
-                        </div>
+                <div className="max-h-72 overflow-y-auto divide-y divide-slate-50">
+                  {notifications.length > 0 ? notifications.map(n => (
+                    <div key={n.id} className={`px-4 py-3 flex gap-3 hover:bg-slate-50 transition-colors ${!n.isRead ? 'bg-blue-50/40' : ''}`}>
+                      <div className="mt-1.5 flex-shrink-0">
+                        {!n.isRead ? <div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> : <Check className="w-3 h-3 text-slate-300" />}
                       </div>
-                    ))
-                  ) : (
-                    <div className="p-6 text-center text-sm font-medium text-slate-500">
-                      No notifications yet.
+                      <div>
+                        <p className={`text-sm leading-snug ${!n.isRead ? 'font-semibold text-slate-800' : 'text-slate-500'}`}>{n.message}</p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">{new Date(n.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                      </div>
                     </div>
+                  )) : (
+                    <div className="px-4 py-8 text-center text-sm text-slate-400">No notifications yet.</div>
                   )}
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-        
-        <div className="h-8 w-px bg-slate-200/50"></div>
 
-        <div className="flex items-center gap-4 group cursor-pointer">
-          <div className="text-right">
-            <p className="text-sm font-bold text-slate-900 group-hover:text-primary-600 transition-colors">{user?.name}</p>
-            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">{user?.role}</p>
+        <div className="w-px h-6 bg-slate-200" />
+
+        {/* User */}
+        <div className="flex items-center gap-2.5 cursor-pointer group">
+          <div className="text-right hidden sm:block">
+            <p className="text-sm font-semibold text-slate-800 leading-tight">{user?.name}</p>
+            <p className="text-[10px] text-slate-400 font-medium">{user?.role}</p>
           </div>
-          <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-primary-600 to-accent-violet p-0.5 shadow-lg group-hover:scale-105 transition-transform duration-300">
-            <div className="w-full h-full rounded-[0.9rem] bg-white flex items-center justify-center text-primary-600 font-bold text-lg">
-              {user?.name.charAt(0)}
-            </div>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white ring-2 ring-blue-100 group-hover:ring-blue-300 transition-all bg-gradient-to-br from-blue-500 to-violet-500">
+            {initials}
           </div>
         </div>
       </div>

@@ -21,14 +21,18 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
+  res.on('finish', () => {
+    console.log(`${req.method} ${req.originalUrl} - ${res.statusCode}`);
+  });
   next();
 });
 
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: 1000, // limit each IP to 1000 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 app.use(limiter);
 

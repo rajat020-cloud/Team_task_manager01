@@ -26,6 +26,7 @@ export const getUsers = async (req: Request, res: Response) => {
     });
     res.json(users);
   } catch (error) {
+    console.error("Error fetching users:", error);
     res.status(500).json({ message: 'Error fetching users' });
   }
 };
@@ -35,7 +36,7 @@ export const updateRemarks = async (req: AuthRequest, res: Response) => {
     if (req.user?.role !== 'Admin') {
       return res.status(403).json({ message: 'Only Admins can update remarks' });
     }
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { remarks } = req.body;
 
     const updatedUser = await prisma.user.update({

@@ -159,7 +159,7 @@ const Team: React.FC = () => {
                   <p className="text-sm font-medium text-slate-500">{selectedMember.role}</p>
                 </div>
               </div>
-              <button onClick={() => setSelectedMember(null)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all">
+              <button aria-label="Close member modal" onClick={() => setSelectedMember(null)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all">
                 <X className="w-6 h-6" />
               </button>
             </div>

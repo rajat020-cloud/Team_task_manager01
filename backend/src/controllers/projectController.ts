@@ -10,14 +10,14 @@ export const getProjects = async (req: AuthRequest, res: Response) => {
     let projects;
     if (role === "Admin") {
       projects = await prisma.project.findMany({
-        include: { members: true, creator: true, tasks: true },
+        include: { members: { include: { user: true } }, creator: true, tasks: true },
       });
     } else {
       projects = await prisma.project.findMany({
         where: {
-          members: { some: { id: userId as string } },
+          members: { some: { userId: userId as string } },
         },
-        include: { members: true, creator: true, tasks: true },
+        include: { members: { include: { user: true } }, creator: true, tasks: true },
       });
     }
 
@@ -45,10 +45,10 @@ export const createProject = async (req: AuthRequest, res: Response) => {
         description,
         createdBy: userId,
         members: {
-          connect: members.map((m: any) => ({ id: m.id }))
+          create: members.map((m: any) => ({ userId: m.id }))
         }
       },
-      include: { members: true }
+      include: { members: { include: { user: true } } }
     });
 
     res.status(201).json(project);
@@ -72,10 +72,11 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
         title,
         description,
         members: {
-          set: members.map((m: any) => ({ id: m.id }))
+          deleteMany: {},
+          create: members.map((m: any) => ({ userId: m.id }))
         }
       },
-      include: { members: true }
+      include: { members: { include: { user: true } } }
     });
 
     res.status(200).json(project);

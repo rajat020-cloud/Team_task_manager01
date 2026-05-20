@@ -14,8 +14,8 @@ A professional full-stack project and task management application built with Rea
 ## 🛠 Tech Stack
 
 * **Frontend**: React.js, Vite, Tailwind CSS, React Router, Recharts, Lucide Icons
-* **Backend**: Node.js, Express.js
-* **Database**: MongoDB with Mongoose
+* **Backend**: Node.js, Express.js, Prisma ORM
+* **Database**: MySQL (configured via `DATABASE_URL`)
 * **Security**: JWT Authentication, bcrypt, Helmet, Express Rate Limit
 
 ## Setup & Installation
@@ -29,8 +29,13 @@ A professional full-stack project and task management application built with Rea
 
 1. `cd backend`
 2. `npm install`
-3. Create a `.env` file and configure MongoDB URI and JWT secret.
+3. Create a `.env` file and configure:
+   - `DATABASE_URL` (MySQL connection string)
+   - `JWT_SECRET`
+   - any other env values required by your backend
 4. `npm run dev` to start the backend server.
+
+> If the Projects page is blank, confirm the backend is running on port `5000` and you are logged in.
 
 ### Frontend Setup
 
@@ -49,10 +54,10 @@ A professional full-stack project and task management application built with Rea
 
 ### Admin
 
-* **Email**: [admin@taskflow.com](mailto:admin@taskflow.com)
-* **Password**: password123
+* **Email**: [admin22@university.com](mailto:admin22@university.com)
+* **Password**: 123456
 
 ### Member
 
-* **Email**: [member@taskflow.com](mailto:member@taskflow.com)
-* **Password**: password123
+* **Email**: [rahul@university.com](mailto:rahul@university.com)
+* **Password**: 123456

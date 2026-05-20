@@ -95,10 +95,15 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
     }
 
     if (status === "Completed" && existingTask.status !== "Completed" && task.createdBy !== userId) {
+      const completedBy = await prisma.user.findUnique({
+        where: { id: userId || "" },
+        select: { name: true },
+      });
+
       await prisma.notification.create({
         data: {
           userId: task.createdBy,
-          message: `Task completed: ${task.title} by ${req.user?.name}`,
+          message: `Task completed: ${task.title} by ${completedBy?.name ?? "a team member"}`,
         }
       });
     }

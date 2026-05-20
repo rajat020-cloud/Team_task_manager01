@@ -9,7 +9,7 @@ interface Project {
   id: string;
   title: string;
   description: string;
-  members: any[];
+  members: { user: { name: string } }[];
   tasks: any[];
   createdAt: string;
   creator: { name: string };
@@ -83,7 +83,11 @@ const Projects: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {projects.map((project) => (
+        {projects.length === 0 ? (
+          <div className="col-span-full rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-12 text-center text-slate-500">
+            No projects available yet. Create one from the button above.
+          </div>
+        ) : projects.map((project) => (
           <motion.div 
             key={project.id} 
             initial={{ opacity: 0, y: 20 }}
@@ -96,6 +100,7 @@ const Projects: React.FC = () => {
               </div>
               {user?.role === 'Admin' && (
                 <button 
+                  aria-label="Delete project"
                   onClick={() => handleDelete(project.id)}
                   className="p-2.5 text-slate-400 hover:text-rose-500 rounded-xl hover:bg-rose-50 transition-all duration-300"
                 >
@@ -124,7 +129,7 @@ const Projects: React.FC = () => {
                   {project.members.slice(0, 3).map((m, i) => (
                     <div key={i} className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary-600 to-accent-violet p-0.5 border-2 border-white shadow-md">
                       <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-[10px] font-bold text-primary-600">
-                        {m.name.charAt(0)}
+                        {m.user?.name?.charAt(0) ?? '?'}
                       </div>
                     </div>
                   ))}

@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -25,58 +25,67 @@ enum Priority {
 }
 
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(uuid())
   name      String
   email     String   @unique
   password  String
   role      Role     @default(Member)
   remarks   String?
   createdAt DateTime @default(now())
-  
+
   projectsCreated Project[] @relation("ProjectCreator")
-  
-  projectIds      String[]  @db.ObjectId
-  projectsMember  Project[] @relation("ProjectMembers", fields: [projectIds], references: [id])
-  
-  tasksAssigned   Task[]    @relation("TaskAssignee")
-  tasksCreated    Task[]    @relation("TaskCreator")
-  notifications   Notification[]
+
+  projectsMember ProjectMember[]
+
+  tasksAssigned Task[]         @relation("TaskAssignee")
+  tasksCreated  Task[]         @relation("TaskCreator")
+  notifications Notification[]
 }
 
 model Project {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(uuid())
   title       String
   description String?
-  createdBy   String   @db.ObjectId
+  createdBy   String
   creator     User     @relation("ProjectCreator", fields: [createdBy], references: [id])
   createdAt   DateTime @default(now())
-  
-  memberIds   String[] @db.ObjectId
-  members     User[]   @relation("ProjectMembers", fields: [memberIds], references: [id])
-  
-  tasks       Task[]
+
+  members ProjectMember[]
+
+  tasks Task[]
+}
+
+model ProjectMember {
+  id        String @id @default(uuid())
+  userId    String
+  projectId String
+
+  user    User    @relation(fields: [userId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@unique([userId, projectId])
 }
 
 model Task {
-  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  id          String     @id @default(uuid())
   title       String
   description String?
-  assignedTo  String?    @db.ObjectId
+  assignedTo  String?
   assignee    User?      @relation("TaskAssignee", fields: [assignedTo], references: [id])
-  projectId   String     @db.ObjectId
+  projectId   String
   project     Project    @relation(fields: [projectId], references: [id])
   priority    Priority   @default(Medium)
   status      TaskStatus @default(Todo)
   dueDate     DateTime?
-  createdBy   String     @db.ObjectId
+  createdBy   String
   creator     User       @relation("TaskCreator", fields: [createdBy], references: [id])
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 }
 
 model Notification {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId
+  id        String   @id @default(uuid())
+  userId    String
   user      User     @relation(fields: [userId], references: [id])
   message   String
   isRead    Boolean  @default(false)

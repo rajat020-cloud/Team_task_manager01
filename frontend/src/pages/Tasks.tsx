@@ -51,10 +51,14 @@ const Tasks: React.FC = () => {
       setTasks(tasksRes.data);
       setProjects(projectsRes.data);
       
-      // Extract unique members from projects for task assignment
-      const membersMap = new Map();
+      // Extract unique user members from projects for task assignment
+      const membersMap = new Map<string, any>();
       projectsRes.data.forEach((p: any) => {
-        p.members.forEach((m: any) => membersMap.set(m.id, m));
+        p.members.forEach((member: any) => {
+          if (member.user && member.user.id) {
+            membersMap.set(member.user.id, member.user);
+          }
+        });
       });
       setTeamMembers(Array.from(membersMap.values()));
     } catch (error) {
@@ -101,9 +105,9 @@ const Tasks: React.FC = () => {
   });
 
   const columns = [
-    { id: 'Todo', label: 'To Do', color: 'bg-slate-400' },
-    { id: 'InProgress', label: 'In Progress', color: 'bg-blue-500' },
-    { id: 'Completed', label: 'Completed', color: 'bg-emerald-500' },
+    { id: 'Todo', label: 'To Do', color: 'bg-slate-400', shadowClass: 'shadow-[0_0_0_6px_rgba(148,163,184,0.35)]' },
+    { id: 'InProgress', label: 'In Progress', color: 'bg-blue-500', shadowClass: 'shadow-[0_0_0_6px_rgba(56,189,248,0.25)]' },
+    { id: 'Completed', label: 'Completed', color: 'bg-emerald-500', shadowClass: 'shadow-[0_0_0_6px_rgba(16,185,129,0.25)]' },
   ];
 
   if (loading) return <div className="flex items-center justify-center h-full">Loading...</div>;
@@ -146,7 +150,7 @@ const Tasks: React.FC = () => {
           <div key={column.id} className="flex-shrink-0 w-[22rem] flex flex-col">
             <div className="flex items-center justify-between mb-6 px-2">
               <div className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-full ${column.color} shadow-lg shadow-${column.color}/40`} />
+                <div className={`w-3 h-3 rounded-full ${column.color} ${column.shadowClass}`} />
                 <h3 className="font-extrabold text-slate-800 uppercase text-xs tracking-widest">
                   {column.label} 
                   <span className="ml-3 px-2 py-0.5 bg-slate-200/50 rounded-full text-[10px] text-slate-500">
@@ -154,7 +158,7 @@ const Tasks: React.FC = () => {
                   </span>
                 </h3>
               </div>
-              <button className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-white rounded-lg transition-all">
+              <button aria-label="Add new task" className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-white rounded-lg transition-all">
                 <Plus className="w-4 h-4" />
               </button>
             </div>
@@ -178,6 +182,7 @@ const Tasks: React.FC = () => {
                         {task.priority}
                       </div>
                       <select 
+                        aria-label="Change task status"
                         className="text-[10px] bg-white/50 border border-transparent rounded-lg focus:ring-0 cursor-pointer font-bold text-slate-400 hover:text-primary-600 transition-colors uppercase px-2 py-1"
                         value={task.status}
                         onChange={(e) => handleStatusChange(task.id, e.target.value)}
@@ -204,6 +209,7 @@ const Tasks: React.FC = () => {
                         <div className="text-right">
                           <p className="text-[9px] font-bold text-slate-500 uppercase leading-none mb-0.5">{task.project.title}</p>
                           <p className="text-[8px] font-bold text-slate-300 uppercase tracking-tighter leading-none">PROJECT</p>
+                          <p className="text-[10px] text-slate-400 mt-1">{task.assignee?.name ?? 'Unassigned'}</p>
                         </div>
                         <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-primary-600 to-accent-violet p-0.5 shadow-sm group-hover:scale-110 transition-transform">
                           <div className="w-full h-full rounded-[0.5rem] bg-white flex items-center justify-center text-[10px] font-bold text-primary-600">
@@ -235,8 +241,9 @@ const Tasks: React.FC = () => {
             <h2 className="text-3xl font-bold text-slate-900 mb-8 tracking-tight">Add New Activity</h2>
             <form onSubmit={handleCreate} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 ml-1">Activity Title</label>
+                <label htmlFor="task-title" className="text-sm font-bold text-slate-700 ml-1">Activity Title</label>
                 <input
+                  id="task-title"
                   type="text"
                   required
                   placeholder="e.g. Design System Review"
@@ -246,8 +253,9 @@ const Tasks: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 ml-1">Instructions / Description</label>
+                <label htmlFor="task-description" className="text-sm font-bold text-slate-700 ml-1">Instructions / Description</label>
                 <textarea
+                  id="task-description"
                   placeholder="Detailed breakdown of the task..."
                   className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:outline-none focus:bg-white focus:border-primary-500 transition-all text-slate-900 font-medium h-28 resize-none"
                   value={newTask.description}
@@ -256,8 +264,9 @@ const Tasks: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 ml-1">Parent Project</label>
+                  <label htmlFor="task-project" className="text-sm font-bold text-slate-700 ml-1">Parent Project</label>
                   <select
+                    id="task-project"
                     required
                     className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:outline-none focus:bg-white focus:border-primary-500 transition-all text-slate-900 font-medium appearance-none"
                     value={newTask.projectId}
@@ -268,8 +277,9 @@ const Tasks: React.FC = () => {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 ml-1">Assignee</label>
+                  <label htmlFor="task-assignee" className="text-sm font-bold text-slate-700 ml-1">Assignee</label>
                   <select
+                    id="task-assignee"
                     className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:outline-none focus:bg-white focus:border-primary-500 transition-all text-slate-900 font-medium appearance-none"
                     value={newTask.assignedTo}
                     onChange={e => setNewTask({...newTask, assignedTo: e.target.value})}
@@ -281,8 +291,9 @@ const Tasks: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 ml-1">Urgency</label>
+                  <label htmlFor="task-priority" className="text-sm font-bold text-slate-700 ml-1">Urgency</label>
                   <select
+                    id="task-priority"
                     className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:outline-none focus:bg-white focus:border-primary-500 transition-all text-slate-900 font-medium appearance-none"
                     value={newTask.priority}
                     onChange={e => setNewTask({...newTask, priority: e.target.value})}
@@ -293,8 +304,9 @@ const Tasks: React.FC = () => {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 ml-1">Target Date</label>
+                  <label htmlFor="task-due-date" className="text-sm font-bold text-slate-700 ml-1">Target Date</label>
                   <input
+                    id="task-due-date"
                     type="date"
                     className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:outline-none focus:bg-white focus:border-primary-500 transition-all text-slate-900 font-medium"
                     value={newTask.dueDate}

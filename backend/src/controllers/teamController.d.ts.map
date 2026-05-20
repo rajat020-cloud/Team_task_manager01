@@ -1,1 +1,1 @@
-{"version":3,"file":"teamController.d.ts","sourceRoot":"","sources":["teamController.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,QAAQ,EAAE,MAAM,SAAS,CAAC;AAG5C,eAAO,MAAM,QAAQ,GAAU,KAAK,OAAO,EAAE,KAAK,QAAQ,kBAezD,CAAC"}
+{"version":3,"file":"teamController.d.ts","sourceRoot":"","sources":["teamController.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,QAAQ,EAAE,MAAM,SAAS,CAAC;AAE5C,OAAO,EAAE,WAAW,EAAE,MAAM,iCAAiC,CAAC;AAE9D,eAAO,MAAM,QAAQ,GAAU,KAAK,OAAO,EAAE,KAAK,QAAQ,kBA2BzD,CAAC;AAEF,eAAO,MAAM,aAAa,GAAU,KAAK,WAAW,EAAE,KAAK,QAAQ,4DAwBlE,CAAC"}

@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CheckSquare, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Zap, Eye, EyeOff } from 'lucide-react';
 import api from '../api/api';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -17,7 +17,7 @@ const Login: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await api.post('/auth/login', { email, password });
+      const response = await api.post('/auth/login', formData);
       login(response.data.token, response.data.user);
       toast.success('Welcome back!');
       navigate('/');
@@ -29,118 +29,127 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-6 overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="/login_background_abstract_1778431247836.png" 
-          alt="background" 
-          className="w-full h-full object-cover scale-105 animate-pulse-slow"
-        />
-        <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"></div>
+    <div className="min-h-screen flex overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.24),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(139,92,246,0.18),_transparent_20%),linear-gradient(135deg,_#667eea_0%,_#764ba2_100%)]">
+      {/* Left Branding Panel */}
+      <div className="hidden lg:flex flex-col justify-between w-[480px] flex-shrink-0 p-12 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-white blur-3xl" />
+          <div className="absolute bottom-20 right-10 w-56 h-56 rounded-full bg-purple-300 blur-3xl" />
+        </div>
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-16">
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
+              <Zap className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-white font-bold text-xl">TaskFlow</span>
+          </div>
+
+          <h1 className="text-5xl font-bold text-white leading-tight mb-6">
+            Manage teams.<br />
+            Ship faster.<br />
+            <span className="text-white/60">Stay organized.</span>
+          </h1>
+          <p className="text-white/70 text-lg leading-relaxed">
+            The all-in-one project management platform built for modern teams.
+          </p>
+        </div>
+
+        <div className="relative z-10 space-y-4">
+          {[
+            { num: '10k+', label: 'Active teams' },
+            { num: '99.9%', label: 'Uptime SLA' },
+            { num: '4.9★', label: 'User rating' },
+          ].map(stat => (
+            <div key={stat.label} className="flex items-center gap-4 bg-white/10 backdrop-blur rounded-2xl px-5 py-4">
+              <span className="text-white font-bold text-xl">{stat.num}</span>
+              <span className="text-white/60 text-sm">{stat.label}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 40, scale: 0.9 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="max-w-[1000px] w-full glass rounded-[3rem] overflow-hidden flex shadow-2xl relative z-10 border border-white/20"
-      >
-        {/* Left Side: Branding/Visual */}
-        <div className="hidden lg:flex flex-1 bg-gradient-to-br from-primary-600/20 to-accent-violet/20 p-12 flex-col justify-between relative overflow-hidden">
-          <div className="relative z-10">
-            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-primary-600 mb-8 shadow-xl">
-              <CheckSquare className="w-8 h-8" />
-            </div>
-            <h1 className="text-5xl font-bold text-white leading-tight">
-              Master your <br /> 
-              <span className="text-primary-200">workflow</span> with <br />
-              TaskFlow.
-            </h1>
-            <p className="text-primary-100/80 mt-6 text-lg max-w-sm">
-              The world's most intuitive platform for team collaboration and task management.
-            </p>
-          </div>
-          
-          <div className="relative z-10 flex gap-4">
-            <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-white text-xs font-bold">
-              #1 Productivity Tool
-            </div>
-            <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-white text-xs font-bold">
-              Trusted by 10k+ Teams
-            </div>
-          </div>
-
-          {/* Decorative Circle */}
-          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-primary-500/20 rounded-full blur-3xl"></div>
-        </div>
-
-        {/* Right Side: Form */}
-        <div className="flex-1 bg-white p-12 md:p-16">
-          <div className="mb-10">
-            <h2 className="text-3xl font-bold text-slate-900">Welcome back</h2>
-            <p className="text-slate-500 mt-2">Enter your details to access your dashboard</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
-              <div className="relative group">
-                <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400 group-focus-within:text-primary-500 transition-colors">
-                  <Mail className="w-5 h-5" />
-                </span>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:outline-none focus:bg-white focus:border-primary-500 transition-all duration-300 text-slate-900 font-medium"
-                  placeholder="name@company.com"
-                />
+      {/* Right Form Panel */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="w-full max-w-md"
+        >
+          <div className="bg-white rounded-3xl shadow-2xl shadow-purple-900/20 p-10">
+            {/* Mobile Logo */}
+            <div className="flex items-center gap-2 mb-8 lg:hidden">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-r from-blue-600 to-violet-600">
+                <Zap className="w-4 h-4 text-white" />
               </div>
+              <span className="font-bold text-slate-800">TaskFlow</span>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Password</label>
-              <div className="relative group">
-                <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400 group-focus-within:text-primary-500 transition-colors">
-                  <Lock className="w-5 h-5" />
-                </span>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:outline-none focus:bg-white focus:border-primary-500 transition-all duration-300 text-slate-900 font-medium"
-                  placeholder="••••••••"
-                />
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-slate-900">Sign in to your account</h2>
+              <p className="text-slate-500 mt-1.5 text-sm">Welcome back! Please enter your details.</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-1.5">
+                <label className="block text-sm font-semibold text-slate-700">Email address</label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 font-medium placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-400 focus:ring-3 focus:ring-blue-500/10 transition-all"
+                    placeholder="you@company.com"
+                  />
+                </div>
               </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-sm font-semibold text-slate-700">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 font-medium placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-400 focus:ring-3 focus:ring-blue-500/10 transition-all"
+                    placeholder="••••••••"
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-70 group bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Signing in...</span>
+                ) : (
+                  <><span>Sign in</span><ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-8 pt-6 border-t border-slate-100 text-center">
+              <p className="text-sm text-slate-500">
+                Don't have an account?{' '}
+                <Link to="/signup" className="text-blue-600 font-semibold hover:text-purple-600 transition-colors">
+                  Create one free →
+                </Link>
+              </p>
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full btn-gradient py-4 flex items-center justify-center gap-3 group"
-            >
-              {loading ? 'Verifying...' : (
-                <>
-                  <span className="text-lg">Sign In to Dashboard</span>
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="mt-12 text-center">
-            <p className="text-slate-500 font-medium">
-              New to TaskFlow?{' '}
-              <Link to="/signup" className="text-primary-600 font-bold hover:text-accent-violet transition-colors underline underline-offset-4 decoration-primary-200 hover:decoration-accent-violet">
-                Create an account
-              </Link>
-            </p>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 };

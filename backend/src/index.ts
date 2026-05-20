@@ -47,12 +47,20 @@ app.get("/", (req, res) => {
   res.send("Team Task Manager API is running...");
 });
 
-app.listen(Number(PORT), '0.0.0.0', async () => {
-  console.log(`Server is running on port ${PORT}`);
-  try {
-    await prisma.$connect();
-    console.log("Database connected successfully");
-  } catch (error) {
-    console.error("Database connection failed:", error);
-  }
-});
+const startServer = async () => {
+  app.listen(Number(PORT), '0.0.0.0', async () => {
+    console.log(`Server is running on port ${PORT}`);
+    try {
+      await prisma.$connect();
+      console.log("Database connected successfully");
+    } catch (error) {
+      console.error("Database connection failed:", error);
+    }
+  });
+};
+
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;

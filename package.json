@@ -8,8 +8,12 @@
   ],
   "scripts": {
     "install:all": "npm --prefix frontend install && npm --prefix backend install",
+    "dev": "concurrently \"npm --prefix frontend run dev\" \"npm --prefix backend run dev\"",
     "build": "npm --prefix frontend run build",
     "build:all": "npm --prefix frontend run build && npm --prefix backend run build",
     "start": "npm --prefix backend run start"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
   }
 }

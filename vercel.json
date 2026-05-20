@@ -1,23 +1,9 @@
 {
   "version": 2,
-  "installCommand": "npm install",
+  "nodejs": "20.x",
+  "installCommand": "npm install --workspaces --ignore-scripts",
   "buildCommand": "npm run build:all",
-  "builds": [
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    },
-    {
-      "src": "backend/src/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "zeroConfig": true
-      }
-    }
-  ],
+  "outputDirectory": "frontend/dist",
   "routes": [
     {
       "src": "/api/(.*)",
@@ -25,8 +11,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/frontend/dist/index.html",
-      "status": 200
+      "dest": "/index.html"
     }
   ]
 }

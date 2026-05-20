@@ -10,9 +10,12 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
 
     let where: any = {};
     if (projectId) where.projectId = projectId as string;
-    
+
     if (role !== "Admin") {
-      where.assignedTo = userId;
+      where.OR = [
+        { assignedTo: userId },
+        { project: { members: { some: { userId } } } },
+      ];
     }
 
     const tasks = await prisma.task.findMany({
@@ -131,7 +134,10 @@ export const getDashboardStats = async (req: AuthRequest, res: Response) => {
 
     let where: any = {};
     if (role !== "Admin") {
-      where.assignedTo = userId;
+      where.OR = [
+        { assignedTo: userId },
+        { project: { members: { some: { userId } } } },
+      ];
     }
 
     const [totalTasks, completedTasks, todoTasks, inProgressTasks, overdueTasks] = await Promise.all([

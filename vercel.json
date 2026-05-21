@@ -5,26 +5,22 @@
     {
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
-      "builds": [
-        {
-          "src": "frontend/package.json",
-          "use": "@vercel/static-build",
-          "config": {
-            "distDir": "dist"
-          }
-        }
-      ],
-      "routes": [
-        {
-          "src": "/api/(.*)",
-          "dest": "/api/index.ts"
-        },
-        {
-          "handle": "filesystem"
-        },
-        {
-          "src": "/.*",
-          "dest": "frontend/dist/index.html"
-        }
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.ts"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/.*",
+      "dest": "frontend/dist/index.html"
+    }
   ]
 }

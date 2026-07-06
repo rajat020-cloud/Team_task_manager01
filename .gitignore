@@ -9,3 +9,6 @@ build
 /backend/generated
 /frontend/dist
 .railway
+
+.vercel
+.env*.local

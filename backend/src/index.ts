@@ -50,6 +50,9 @@ app.get("/", (req, res) => {
 const startServer = async () => {
   app.listen(Number(PORT), '0.0.0.0', async () => {
     console.log(`Server is running on port ${PORT}`);
+    const dbUrl = process.env.DATABASE_URL || '';
+    const maskedUrl = dbUrl.replace(/:[^:@]+@/, ':****@');
+    console.log(`Prisma is connecting to: ${maskedUrl}`);
     try {
       await prisma.$connect();
       console.log("Database connected successfully");

@@ -9,12 +9,15 @@ import projectRoutes from "./routes/projectRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import teamRoutes from "./routes/teamRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
-import prisma from "./models/prisma.js";
+import connectDB from "./models/db.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Connect to MongoDB if process is not running in serverless Vercel function, or ensure connection
+connectDB();
 
 // Middleware
 app.use(helmet());
@@ -48,17 +51,8 @@ app.get("/", (req, res) => {
 });
 
 const startServer = async () => {
-  app.listen(Number(PORT), '0.0.0.0', async () => {
+  app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
-    const dbUrl = process.env.DATABASE_URL || '';
-    const maskedUrl = dbUrl.replace(/:[^:@]+@/, ':****@');
-    console.log(`Prisma is connecting to: ${maskedUrl}`);
-    try {
-      await prisma.$connect();
-      console.log("Database connected successfully");
-    } catch (error) {
-      console.error("Database connection failed:", error);
-    }
   });
 };
 

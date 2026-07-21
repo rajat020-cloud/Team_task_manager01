@@ -7,8 +7,12 @@ async function main() {
   try {
     await prisma.$connect();
     console.log('Connected successfully!');
-    const count = await prisma.user.count();
-    console.log('User count:', count);
+    const result = await prisma.$queryRaw`
+      SELECT table_schema, table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public';
+    `;
+    console.log('Tables in database:', result);
   } catch (error) {
     console.error('Operation failed:', error);
   } finally {
